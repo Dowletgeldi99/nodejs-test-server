@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  server_app:
+    restart: always
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: development
+    command: npm run start:dev
+    ports:
+      - "3000:3000"
+    networks:
+      - node_test_network
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  mongodb:
+    image: mongo:4.4.6
+    container_name: 'mongodb'
+    platform: linux/amd64
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+    volumes:
+      - '~/node_test_mongo-data:/data/db'
+    networks:
+      - node_test_network
+    ports:
+      - "27018:27017"
+    restart: always
+
+networks:
+  node_test_network:
+    driver: bridge
